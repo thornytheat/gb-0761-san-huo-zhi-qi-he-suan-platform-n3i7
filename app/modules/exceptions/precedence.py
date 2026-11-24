@@ -10,3 +10,13 @@ def adjudicate(active):
             "winner": winner["stop_id"],
             "sources": [{"id": row["stop_id"], "kind": row["kind"], "line": row["line"],
                          "start": row["start"], "end": row["end"]} for row in ordered]}
+
+
+def adjudicate_overtime(active, rain_charged):
+    """额度耗尽后的裁决：新合同下雨停不再免计，改按可计分钟计费；
+    假日仍合同免计，缺证仍待补证，优先级 缺证 > 假日 > 雨停 不变。"""
+    verdict = adjudicate(active)
+    if rain_charged and verdict["reason"] == "RAIN":
+        verdict["bucket"] = "counted"
+        verdict["reason"] = "RAIN_CHARGED"
+    return verdict

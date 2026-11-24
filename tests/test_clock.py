@@ -15,6 +15,13 @@ def test_exhaustion_inside_segment(dirty):
     assert clock(dirty)['overtime_start'] == '2027-01-01T00:35+00:00'
 
 
+def test_exhaustion_splits_counted_segment(dirty):
+    rows = clock(dirty)['rows']
+    split = [r for r in rows if r['split']]
+    assert len(split) == 2 and split[0]['end'] == split[1]['start'] == '2027-01-01T00:35+00:00'
+    assert (split[0]['allowance_min'], split[1]['overtime_min']) == (20, 10)
+
+
 def test_allowance_exactly_consumed(clean):
     result = clock(clean)
     assert (result['counted'], result['overtime_min'], result['overtime_start']) == (60, 0, None)

@@ -1,0 +1,2 @@
+version,start,end,priority,wait_min,allow_min,tier1_min,rate1_usd_min,rate2_usd_min,rain_charge_after_allowance
+RB1,2027-02-01T00:00Z,2027-03-01T00:00Z,10,0,30,90,3,5,true

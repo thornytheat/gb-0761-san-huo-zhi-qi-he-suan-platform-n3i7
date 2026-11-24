@@ -10,7 +10,7 @@
   <aside class="rail">
     <a class="brand" href="/"><span aria-hidden="true">∥</span><h1>散货滞期核算台</h1></a>
     <nav aria-label="核算导航">
-      {% for key,label in names.items() %}<a href="/{{ key }}{% if mode == 'clean' %}?sample=clean{% endif %}" {% if key == stage %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+      {% for key,label in names.items() %}<a href="/{{ key }}{% if mode in ['clean', 'rainbill'] %}?sample={{ mode }}{% endif %}" {% if key == stage %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
     </nav>
     <small>泊位商务 / USD</small>
   </aside>
@@ -25,6 +25,7 @@
         <select name="sample" id="harbor-sample">
           <option value="dirty" {{ 'selected' if mode == 'dirty' }}>跨年争议航次</option>
           <option value="clean" {{ 'selected' if mode == 'clean' }}>标准完结航次</option>
+          <option value="rainbill" {{ 'selected' if mode == 'rainbill' }}>新合同雨停照计航次</option>
           <option value="custom" {{ 'selected' if mode == 'custom' }}>自填 CSV</option>
         </select>
         {% if stage != 'evidence' %}<button id="recalculate" type="submit">{{ '留档或重跑' if stage == 'runs' else '复算' }}</button>{% endif %}
@@ -47,11 +48,19 @@
       {% if ledger %}{% include 'duel.html' %}{% endif %}
       {% if table %}
       <section class="panel"><h3>{{ table[0] }}</h3><div class="scroll"><table><thead><tr>{% for col in table[1] %}<th>{{ col }}</th>{% endfor %}</tr></thead><tbody>
-      {% for row in table[2] %}<tr>{% for value in row %}<td class="{{ 'number' if value is number }}">{{ value if value is not none and value != '' else '—' }}</td>{% endfor %}</tr>{% else %}<tr><td colspan="6">当前没有区间。</td></tr>{% endfor %}
+      {% for row in table[2] %}<tr>{% for value in row %}<td class="{{ 'number' if value is number }}">{{ value if value is not none and value != '' else '—' }}</td>{% endfor %}</tr>{% else %}<tr><td colspan="{{ table[1]|length }}">当前没有区间。</td></tr>{% endfor %}
       </tbody></table></div></section>
       {% endif %}
       {% if results.notice and stage == 'notice' %}<section class="panel notes">装卸窗 {{ results.notice.start }} 至 {{ results.notice.end }} · 港方完成原行 #{{ results.notice.completion_line }}</section>{% endif %}
       {% if results.exceptions and stage == 'exceptions' %}<section class="panel notes">重叠切片 {{ results.exceptions.overlaps }} 段 · 窗外 {{ results.exceptions.outside|length }} 条</section>{% endif %}
+      {% if clock and stage == 'clock' %}
+      <section class="panel notes">
+        {% if clock.rain_charge_after_allowance %}新合同条款已启用：免计额度（{{ clock.allowance_min }} min）耗尽后雨停照常计费，假日仍按合同免计；额度耗尽点 {{ clock.overtime_start or '未触发' }}。
+        {% else %}本合同未约定逾期雨停照计，雨停与假日一律免计；额度耗尽点 {{ clock.overtime_start or '未触发' }}。{% endif %}
+        分段守恒：{{ '通过' if clock.balanced else '失衡' }}。
+        {% if clock.pending_verification %}<br><strong>待核：</strong>{% for item in clock.pending_verification %}{{ item.start }}–{{ item.end }}（{{ item.minutes }} min，{{ item.sources|join(' / ') }}）{% if not loop.last %}；{% endif %}{% endfor %}{% endif %}
+      </section>
+      {% endif %}
       {% if stage in ['runs','evidence'] %}{% include 'archive.html' %}{% endif %}
       {% if intake %}<section class="panel"><details id="exception-log"><summary>原件隔离簿 · {{ intake.isolated|length }} 条</summary>
         <div class="scroll"><table><thead><tr><th>来源</th><th>原行号</th><th>原因</th><th>原值</th></tr></thead><tbody>

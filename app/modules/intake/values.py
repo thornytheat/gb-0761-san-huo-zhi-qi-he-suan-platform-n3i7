@@ -13,6 +13,15 @@ def required(text):
     return value
 
 
+def truthy(text):
+    value = text.strip().lower()
+    if value in {"true", "1", "yes", "y"}:
+        return True
+    if value in {"false", "0", "no", "n"}:
+        return False
+    raise ValueError("INVALID_BOOLEAN")
+
+
 def minute_stamp(text):
     try:
         dt = datetime.fromisoformat(text)

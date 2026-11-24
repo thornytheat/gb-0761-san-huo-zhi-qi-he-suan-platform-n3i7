@@ -14,6 +14,22 @@ def test_main_page_and_clean_form(client):
     assert b'0.00 USD' in response.data and b'160.00 USD' not in response.data
 
 
+def test_rainbill_page_shows_basis_and_pending(client):
+    response = client.get('/ledger?sample=rainbill')
+    assert response.status_code == 200
+    assert '雨停照计'.encode() in response.data
+    assert '缺证/雨停重叠待核'.encode() in response.data
+    assert b'-125.00' in response.data
+    assert b'RB-RAIN2' in response.data
+
+
+def test_rainbill_clock_page_shows_rule_note(client):
+    response = client.get('/clock?sample=rainbill')
+    assert response.status_code == 200
+    assert '新合同条款已启用'.encode() in response.data
+    assert '雨停照计'.encode() in response.data
+
+
 def test_bad_custom_source_recovers_in_place(client, dirty):
     dirty['events'] = 'bad,name\nvalue,keep\n'
     response = client.post('/notice', data={'sample': 'custom', **dirty})

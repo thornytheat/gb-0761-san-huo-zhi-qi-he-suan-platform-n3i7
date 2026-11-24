@@ -5,7 +5,7 @@ from .errors import Rejected
 
 
 def sample(name):
-    if not isinstance(name, str) or name not in {"clean", "dirty"}:
+    if not isinstance(name, str) or name not in {"clean", "dirty", "rainbill"}:
         raise Rejected("UNKNOWN_SAMPLE", status=404)
     return {key: (ROOT / "sample_data" / name / f"{key}.csv").read_text(encoding="utf-8") for key in FILES}
 

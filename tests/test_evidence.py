@@ -10,7 +10,7 @@ def certificate(client, sample):
 def test_dirty_withheld_certificate(client):
     pack = certificate(client, 'dirty')
     assert pack['can_settle'] is False
-    assert pack['evidence_counts'] == {'intervals': 7, 'tiers': 2, 'isolated': 6}
+    assert pack['evidence_counts'] == {'intervals': 8, 'tiers': 2, 'isolated': 6}
 
 
 def test_clean_certificate_settleable(client):

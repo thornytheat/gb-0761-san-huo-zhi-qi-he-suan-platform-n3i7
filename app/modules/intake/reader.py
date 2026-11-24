@@ -3,8 +3,8 @@ import io
 
 from app.errors import Rejected
 from app.reasons import issue
-from .contract import HEADERS
-from .values import required
+from .contract import HEADERS, OPTIONAL
+from .values import required, truthy
 
 
 def rows(source, text):
@@ -12,6 +12,7 @@ def rows(source, text):
     if not text:
         raise Rejected("EMPTY_FILE", source)
     expected = HEADERS[source].split(',')
+    optional = OPTIONAL.get(source, {})
     reader = csv.reader(io.StringIO(text, newline=''), strict=True)
     header = None
     stats = {"input": 0, "blank": 0, "headers": 0}
@@ -29,7 +30,7 @@ def rows(source, text):
                 continue
             if header is None:
                 header = [value.strip() for value in row]
-                if sorted(header) != sorted(expected):
+                if sorted(header) != sorted(expected) and sorted(header) != sorted([*expected, *optional]):
                     raise Rejected("BAD_HEADER", source)
                 stats["headers"] = 1
                 continue
@@ -42,6 +43,10 @@ def rows(source, text):
                 continue
             try:
                 fields = {name: required(value) for name, value in zip(header, row)}
+                for name, default in optional.items():
+                    fields.setdefault(name, default)
+                for name in optional:
+                    fields[name] = truthy(fields[name])
                 records.append((line, row, fields))
             except ValueError as exc:
                 isolated.append(issue(str(exc), source, line, row))

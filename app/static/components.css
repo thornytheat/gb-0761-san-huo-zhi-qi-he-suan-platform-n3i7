@@ -37,6 +37,11 @@ th { position: sticky; top: 0; background: var(--surface-2); z-index: 1; }
 .delta small { font-size: 10px; overflow-wrap: anywhere; }
 .duel-total { background: var(--surface-2); border-top: 1px solid var(--line); }
 .archive p, .archive dl { margin: 10px 13px; overflow-wrap: anywhere; }
+.basis { text-align: left; display: flex; flex-direction: column; gap: 4px; }
+.tag { display: inline-block; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line-strong); font-size: 10px; white-space: normal; font-family: var(--font-num); }
+.tag.rain-charged { border-color: var(--warn); color: var(--warn); background: #fdf9f0; }
+.tag.pending { border-color: var(--bad); color: var(--bad); }
+.problem .tag { margin: 3px; }
 @media (max-width: 580px) {
   .ledger-cap, .duel-total, .entry { grid-template-columns: minmax(0,1fr) 74px minmax(0,1fr); }
   .entry > div, .duel-total > * { padding: 5px; }
